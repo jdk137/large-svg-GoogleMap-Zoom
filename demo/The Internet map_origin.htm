@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style type="text/css">@media print {  .gmnoprint {    display:none  }}@media screen {  .gmnoscreen {    display:none  }}</style><script src="The%20Internet%20map_files/menu129.js" type="text/javascript"></script><script src="The%20Internet%20map_files/shares.json" type="text/javascript"></script><script src="The%20Internet%20map_files/counter004.js" type="text/javascript"></script><link media="all" href="The%20Internet%20map_files/counter003.css" type="text/css" rel="stylesheet"><script src="The%20Internet%20map_files/zh-cn.js" type="text/javascript"></script><link media="all" href="The%20Internet%20map_files/widget096.css" type="text/css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link href="The%20Internet%20map_files/style.css" rel="Stylesheet">
+    <script src="The%20Internet%20map_files/ga.js" async="" type="text/javascript"></script><script type="text/javascript" src="The%20Internet%20map_files/jquery.js"></script>
+    <script type="text/javascript" src="The%20Internet%20map_files/js"></script><script src="The%20Internet%20map_files/main.js" type="text/javascript"></script>
+    <link href="The%20Internet%20map_files/jquery-ui.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="The%20Internet%20map_files/jquery-ui.js"></script>
+    <script type="text/javascript">
+        // Эвклидова Проекция
+        var EuclideanProjection = function () {
+            // Ширина, она же высота одного кусочка картинки
+            var EUCLIDEAN_RANGE = 256;
+            // Центр этой самой картинки
+            this.pixelOrigin = new google.maps.Point(EUCLIDEAN_RANGE / 2, EUCLIDEAN_RANGE / 2);
+            // Количество градусов в одном пикселе картинки
+            this.pixelsPerLonDegree = EUCLIDEAN_RANGE / 360;
+            // Количество радиан в одном пикселе картинки
+            this.pixelsPerLonRadian = EUCLIDEAN_RANGE / (2 * Math.PI);
+        };
+
+        // Эти два метода надо реализовать в классе проекции
+        // http://code.google.com/apis/maps/documentation/javascript/maptypes.html#Projections
+        EuclideanProjection.prototype = {
+            pixelOrigin: new google.maps.Point(0, 0),
+            pixelsPerLonDegree: 0,
+            pixelsPerLonRadian: 0,
+
+            // код взят из 
+            // http://library.ucf.edu/Web/JS/Maps.js
+            // в работе можно глянуть тут
+            // http://library.ucf.edu/Administration/Maps/
+            // страна должна знать героев в лицо
+            fromLatLngToPoint: function (latLng, opt_point) {
+                var point = opt_point || new google.maps.Point(0, 0);
+                point.x = this.pixelOrigin.x + latLng.lng() * this.pixelsPerLonDegree;
+                point.y = this.pixelOrigin.y + (-1 * latLng.lat()) * this.pixelsPerLonDegree;
+                //console.log("fromLatLngToPoint", latLng, point);
+                return point;
+            },
+
+            fromPointToLatLng: function (point) {
+                var lng = (point.x - this.pixelOrigin.x) / this.pixelsPerLonDegree,
+                    lat = -1 * (point.y - this.pixelOrigin.y) / this.pixelsPerLonDegree;
+                //console.log("fromPointToLatLng", point, new google.maps.LatLng(lat , lng, true));
+                return new google.maps.LatLng(lat, lng, true);
+            }
+        };
+    </script>
+    <script type="text/javascript">
+        var imageOptions = {
+            getTileUrl: function (coord, zoom) {
+                return "http://d2h9tsxwphc7ip.cloudfront.net/" + zoom + '/' + coord.x + ' ' + coord.y + ".png";
+            },
+            tileSize: new google.maps.Size(256, 256),
+            isPng: true
+        };
+
+        var imageMap = new google.maps.ImageMapType(imageOptions);
+        imageMap.projection = new EuclideanProjection();
+        imageMap.name = "webmap";
+        imageMap.minZoom = 2;
+        imageMap.maxZoom = 14;
+
+        var mapOptions = {
+            zoom: 1,
+            streetViewControl: false,
+            panControl: false,
+            center: new google.maps.LatLng(25, 0),
+            mapTypeControlOptions: {
+                mapTypeIds: []
+            },
+            backgroundColor: 'black'
+        };
+
+        //в эту функцию передаем координаты тайла и zoom и и она показывает нужный тайл
+        function g(x, y, zoom) {
+            var z = Math.min(zoom + 2, imageMap.maxZoom);
+            var point = new google.maps.Point(x, y);
+            var t = imageMap.projection.fromPointToLatLng(point);
+            map.panTo(t);
+            map.setZoom(z);
+        };
+
+        function initialize() {
+            map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+            map.mapTypes.set('webmap', imageMap);
+            map.setMapTypeId('webmap');
+            google.maps.event.addListener(map, 'click', function (event) {
+                gClick(event);
+            });
+            posurl();
+        }
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            var lang = 'en';
+
+            $('.abouttUs').click(function () {
+                $('.abouttUs').show();
+
+                if ($('.contaner').hasClass('active')) {
+                    $('.contaner').removeClass('active')
+                } else {
+                    $('.contaner').addClass('active')
+                }
+
+                return false;
+            });
+
+            $('.contaner .textBlock').html($('#aboutTextEn').val());
+
+            $('.contaner .close').click(function () {
+                $('.contaner').removeClass('active');
+            });
+
+            $('#langSelector').click(function (e) {
+                if (lang == 'ru') {
+                    $(e.target).addClass('ru').removeClass('en');
+
+                    changeLang({
+                        title: 'The Internet map',
+                        about: 'About',
+                        back: 'Back',
+                        search: 'Find',
+                        placeholder: 'Site address or country',
+                        aboutText: $('#aboutTextEn').val(),
+                        blog: 'Blog',
+                        lang: 'en'
+                    });
+                    lang = 'en';
+
+                } else if (lang == 'en') {
+                    $(e.target).addClass('en').removeClass('ru');
+
+                    changeLang({
+                        title: 'Карта Интернета',
+                        about: 'О проекте',
+                        search: 'Найти',
+                        placeholder: 'Страна или адрес сайта',
+                        aboutText: $('#aboutTextRu').val(),
+                        blog: 'Блог',
+                        lang: 'ru'
+                    });
+                    lang = 'ru';
+                }
+            });
+
+            $('body').click(function (e) {
+                if (!$(e.target).parents('.contaner.active').length && !$(e.target).hasClass('langSelector'))
+                    $('.contaner').removeClass('active');
+            });
+
+            function changeLang(o) {
+                $('.formDiv h1').text(o.title);
+                document.title = o.title;
+                $('.abouttUs.to').text(o.about);
+                $('.blog').text(o.blog);
+                $('.buttonBlock').val(o.search);
+                $('input#searchString').attr('placeholder', o.placeholder);
+                $('.contaner .textBlock').html(o.aboutText);
+            }
+        })
+    </script><script src="The%20Internet%20map_files/commonmap.js" charset="UTF-8" type="text/javascript"></script>
+    <script type="text/javascript">
+        function setBaloon(data,bPosition) {
+            var contentString = '<div>'+
+                '<a href="http://www.'+ data.url +'" target="_blank">'+ data.url + '</a>'+
+                '</div>';
+            bPosition = imageMap.projection.fromPointToLatLng(bPosition);
+            var marker = new google.maps.Marker({
+                position: bPosition,
+                map: map,
+                visible:false
+            });
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString,
+            });
+            infowindow.open(map,marker);
+        }
+        function gClick(event) {
+            
+            var xGmap = event.X.x;
+            var yGmap = event.X.y;
+            $.getJSON("/Hit", { x: xGmap, y: yGmap },
+                function (data) {
+                    if(data)
+                    {
+                        setBaloon(data,event.X);
+                    };
+
+                }); 
+
+             
+        };
+        function puturl(x, y, zoom) {
+            window.location.hash = zoom + "-" + x + "-" + y;
+        };
+
+        function posurl() {
+            var str = location.href;
+            str = str.split('#');
+            if (str[1]) {
+                str = str[1].split('-');
+
+                var x = parseFloat(str[1]);
+                var y = parseFloat(str[2]);
+                var z = parseInt(str[0]);
+
+                if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+                    g(x, y, z);
+                }
+            }
+        };
+
+        function sendForm() {
+            if (document.getElementById("searchString").value != "") {
+                $.getJSON("/Find/" + document.getElementById("searchString").value, {},
+                    function (data) {
+                        if (data.zoom > 0) {
+                            g(data.x, data.y, data.zoom, true);
+                            puturl(data.x, data.y, data.zoom);
+                        }
+                        else {
+                            alert("Site not found");
+                        }
+                    });
+            }
+        }
+    </script>
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-32410895-1']);
+        _gaq.push(['_setDomainName', 'internet-map.net']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+    <title>The Internet map</title>
+<div id="_atssh" style="visibility: hidden; height: 1px; width: 1px; position: absolute; z-index: 100000;"><iframe src="The%20Internet%20map_files/sh102.htm" style="height: 1px; width: 1px; position: absolute; z-index: 100000; border: 0px none; left: 0px; top: 0px;" title="AddThis utility frame" id="_atssh757"></iframe></div><script src="The%20Internet%20map_files/core043.js" type="text/javascript"></script><script src="The%20Internet%20map_files/utilstats.js" charset="UTF-8" type="text/javascript"></script><script src="The%20Internet%20map_files/onioncontrols.js" charset="UTF-8" type="text/javascript"></script></head>
+<body onload="initialize()">
+    <section>
+
+        <div class="shareBox">
+            <!-- AddThis Button BEGIN -->
+            <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+            <a href="#" title="Facebook" class="addthis_button_preferred_1 addthis_button_facebook at300b"><span class=" at300bs at15nc at15t_facebook"><span class="at_a11y">Share on facebook</span></span></a>
+            <a href="#" title="Tweet This" class="addthis_button_preferred_2 addthis_button_twitter at300b"><span class=" at300bs at15nc at15t_twitter"><span class="at_a11y">Share on twitter</span></span></a>
+            <a href="#" title="Email" class="addthis_button_preferred_3 addthis_button_email at300b"><span class=" at300bs at15nc at15t_email"><span class="at_a11y">Share on email</span></span></a>
+            <a href="#" title="Print" class="addthis_button_preferred_4 addthis_button_print at300b"><span class=" at300bs at15nc at15t_print"><span class="at_a11y">Share on print</span></span></a>
+            <a href="#" class="addthis_button_compact at300m"><span class=" at300bs at15nc at15t_compact"><span class="at_a11y">More Sharing Services</span></span></a>
+            <a href="#" style="display: block;" class="addthis_counter addthis_bubble_style"><a href="#" title="View more services" class="addthis_button_expanded">3</a><a class="atc_s addthis_button_compact"><span></span></a></a>
+            <div class="atclear"></div></div>
+            <script type="text/javascript">    var addthis_config = { "data_track_addressbar": true };</script>
+            <script type="text/javascript" src="The%20Internet%20map_files/addthis_widget.js"></script>
+            <!-- AddThis Button END -->
+        </div>
+
+        <div class="formDiv">
+
+            <h1>The Internet map</h1>
+            <div class="controls">
+                <a href="http://internet-map.net/" class="abouttUs to">About</a><a target="_blank" class="blog" href="http://the-internet-map.blogspot.com/">Blog</a><span id="langSelector" class="langSelector ir ru"></span>
+            </div>
+            
+            <form action="" onsubmit="sendForm(); return false;">
+                <input class="textBox" id="searchString" name="text" placeholder="Site address or country" type="text">
+                <input class="buttonBlock" value="Find" type="submit">
+            </form>
+
+            <input id="aboutTextRu" value="&lt;h2&gt;Карта Интернета&lt;/h2&gt;&lt;p&gt;Аналогично любой другой карте, Карта Интернета это схема, показывающая взаимное расположение объектов. Но, в отличие от реальных карт (карта Земли) или виртуальных карт (карта Мордора), на Карте Интернета показаны объекты, не лежащие на поверхности. Говоря математическим языком, Карта Интернета ― это двумерное отображение связей между сайтами в интернете. Каждый сайт ― это круг на карте, его размер определяется посещаемостью сайта. Выше посещаемость ― больше круг. Переходы пользователей между сайтами образуют связи, чем сильнее связь ― тем ближе сайты «хотят» расположиться друг к другу.&lt;/p&gt;&lt;h2&gt;Заряды и пружины&lt;/h2&gt;&lt;p&gt;Если провести аналогию из классической физики, то можно сказать что сайты ― это заряженные шарики, а связи ― это пружины. Пружины притягивают похожие сайты, а одинаковый заряд не дает шарикам соприкасаться и отталкивает их ― если между ними нет связи. Изначально все шарики-сайты случайным образом разбросаны по поверхности карты. Пружины натянуты, энергия отталкивания высока ― система далека от равновесия. Затем сайты начинают перемещаться под действием приложенных сил и через некоторое время останавливаются ― силы притяжения стали равны силам отталкивания, система достигла своего равновесия. Именно это состояние показано на Карте Интернета.&lt;/p&gt;&lt;p&gt;Также можно провести очень грубую аналогию из квантовой физики. В этом случае, сайт ― это материальное тело имеющее массу, отдельный пользователь это квант массы ― тот самый [пока] не найденный бозон Хигса, а акт перехода пользователя между сайтами это квант гравитации ― гипотетическая частица гравитон.&lt;/p&gt;&lt;p&gt;Так или иначе, реальный алгоритм построения Карты Интернета довольно далек от аналогий приведенных выше. Для интересующихся, самое близкое описание математической модели можно найти в &lt;a href='http://reports-archive.adm.cs.cmu.edu/anon/1998/CMU-CS-98-189.pdf'&gt;[1]&lt;/a&gt;, а инженерное решение очень похоже на то, что описано в &lt;a href='ftp://sleepgate.dyndns.org/library/CUDA/nbody_gems3_ch31.pdf'&gt;[2]&lt;/a&gt;. В качестве платформы для отображения использован движок google maps.&lt;/p&gt;&lt;h2&gt;Семантический веб&lt;/h2&gt;&lt;p&gt;Карта Интернета это снимок глобальной сети состоянию на конец 2011 года. Она охватывает более 350 тысяч сайтов из 196 стран и все доменные зоны. Информация о более чем 2 миллионах связей между сайтами объединила их в тематические кластеры. Как и можно было ожидать, самые крупные кластеры образованы национальными сайтами, т.е. сайтами принадлежащими одной стране. Для удобства, сайты относящиеся к одной стране показаны одинаковым цветом. Например, красная область вверху соответствует Рунету, желтая слева ― китайскому сегменту сети, фиолетовая справа ― Японии, обширная светло-голубая область в центре это американский сегмент и т.д.&lt;/p&gt;&lt;img class='infoIMG' alt='info' src='../../Content/info/info-rus.jpg' /&gt;&lt;p&gt;Важно отметить, что кластеры несут семантическую нагрузку, т.е. объединяют сайты согласно их содержанию. Например, можно увидеть обширный кластер порно сайтов между Японией и Бразилией, а также множество мелких кластеров объединяющих сайты одной отрасли или похожей направленности.&lt;/p&gt;&lt;h2&gt;Феномен Интернета&lt;/h2&gt;&lt;p&gt;Глобальная сеть Интернет ― это феномен технологической цивилизации, ее исключительная сложность превышает все, когда-либо созданное человеком. Это огромное количество практически несистематизированной информации. Карта Интернета ― это попытка заглянуть в скрытую структуру сети, оценить ее колоссальный масштаб, рассмотреть то, что невозможно увидеть из сухих цифр статистики.&lt;/p&gt;&lt;h2&gt;Отзывы и предложения&lt;/h2&gt;&lt;p&gt;Мы рады каждому письму. Пишите на адрес &lt;a href='mailto:internetmap.net@gmail.com'&gt;internetmap.net@gmail.com&lt;/a&gt;. Также читайте о Карте Интернета на &lt;a href='http://habrahabr.ru/post/148351'&gt;Хабре&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Карта Интернета это некоммерческий проект. Вы можете взять на себя часть наших расходов, чтобы больше людей смогли увидеть красоту Интернета.&lt;/p&gt;&lt;form action='https://www.paypal.com/cgi-bin/webscr' method='post'&gt;&lt;input type='hidden' name='cmd' value='_s-xclick'&gt;&lt;input type='hidden' name='encrypted' value='-----BEGIN PKCS7-----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-----END PKCS7-----'&gt;&lt;input type='image' src='https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif' border='0' name='submit' alt='PayPal — The safer, easier way to pay online.'&gt;&lt;img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'&gt;&lt;/form&gt;" type="hidden">
+            <input id="aboutTextEn" value="&lt;h2&gt;The map of the Internet&lt;/h2&gt;&lt;p&gt;Like any other map, The Internet map is a scheme displaying objects’ relative position; but unlike real maps (e.g. the map of the Earth) or virtual maps (e.g. the map of Mordor), the objects shown on it are not aligned on a surface. Mathematically speaking, The Internet map is a bi-dimensional presentation of links between websites on the Internet. Every site is a circle on the map, and its size is determined by website traffic, the larger the amount of traffic, the bigger the circle. Users’ switching between websites forms links, and the stronger the link, the closer the websites tend to arrange themselves to each other.&lt;/p&gt;&lt;h2&gt;	Charges and springs&lt;/h2&gt;&lt;p&gt;To draw an analogy from classical physics, one may say that websites are electrically charged bodies, while links between them are springs. Springs pull similar websites together, and the charge does not let the bodies adjoin and pushes websites apart if there is no link between them. Originally, all such electrified bodies (websites) are randomly scattered on the surface of the map. Springs are stretched, repulsion energy is high – the system is far from being at equilibrium. Then the websites start moving under the influence of the forces exerted and in a while come to a halt – forces of attraction now become equal to forces of repulsion, the system has reached its equilibrium. It is exactly that state that is shown on The Internet map.&lt;/p&gt;&lt;p&gt;Also, an analogy can be drawn from quantum physics. In this case, a website is a physical body with a finite mass, a single user is the mass quantum – the much-spoken-about, yet-to-be-found Higgs’ boson, whereas the act of user’s switching between sites is the gravitational quantum – the graviton, another hypothetical particle.&lt;/p&gt;&lt;p&gt;Anyway, the real algorithm of plotting The Internet map is quite far from the analogies given above. For those interested, the closest description of the mathematical model can be found in the research &lt;a href='http://reports-archive.adm.cs.cmu.edu/anon/1998/CMU-CS-98-189.pdf'&gt;[1]&lt;/a&gt;, and the engineering solution looks very similar to what has been described in &lt;a href='ftp://sleepgate.dyndns.org/library/CUDA/nbody_gems3_ch31.pdf'&gt;[2]&lt;/a&gt;. Google Maps engine has been used as the platform for displaying.&lt;/p&gt;&lt;h2&gt;Semantic web&lt;/h2&gt;&lt;p&gt;The map of the Internet is a photo shot of the global network as of end of 2011. It encompasses over 350 thousand websites from 196 countries and all domain zones. Information about more than 2 million links between the websites has joined some of them together into topical clusters. As one might have expected, the largest clusters are formed by national websites, i.e. sites belonging to one country. For the sake of convenience, all websites relative to a certain country carry the same color. For instance, the red zone at the top corresponds to Russian segment of the net, the yellow one on the left stands for the Chinese segment, the purple one on the right is Japanese, the large light-blue central one is the American segment, etc.&lt;/p&gt;&lt;img class='infoIMG' alt='info' src='../../Content/info/info-eng.jpg' /&gt;&lt;p&gt;Importantly, clusters on the map are semantically charged, i.e. they join websites together according to their content. For example, a vast porno cluster can be seen between Brazil and Japan as well as a host of minor clusters uniting websites of the same field or similar purposes.&lt;/p&gt;&lt;h2&gt;	The Internet Phenomenon&lt;/h2&gt;&lt;p&gt;The Internet global network is a phenomenon of technological civilization, and its exceptional complexity surpasses anything mankind has ever created. In essence, what we are dealing with here is a huge quantity of utterly unstructured information. The Internet map is an attempt to look into the hidden structure of the network, fathom its colossal scale, and examine that which is impossible to understand from the bare figures of statistics.&lt;/p&gt;&lt;h3&gt;Ideas and suggestions&lt;/h3&gt;&lt;p&gt;We will appreciate any feedback. Please use the address &lt;a href='mailto:internetmap.net@gmail.com'&gt;internetmap.net@gmail.com&lt;/a&gt; and check out our &lt;a href='http://the-internet-map.blogspot.com/'&gt;blog&lt;/a&gt; also.&lt;/p&gt;&lt;p&gt;The Internet map is a non-commercial project. You can share our expenses and let more people see beauty of the Internet.&lt;/p&gt;&lt;form action='https://www.paypal.com/cgi-bin/webscr' method='post'&gt;&lt;input type='hidden' name='cmd' value='_s-xclick'&gt;&lt;input type='hidden' name='encrypted' value='-----BEGIN PKCS7-----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-----END PKCS7-----'&gt;&lt;input type='image' src='https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif' border='0' name='submit' alt='PayPal — The safer, easier way to pay online.'&gt;&lt;img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'&gt;&lt;/form&gt;" type="hidden">
+        </div>
+        <div class="contaner ownC">
+            <img src="The%20Internet%20map_files/close.gif" class="close" alt="close">
+            <div class="textBlock"><h2>The map of the Internet</h2><p>Like
+ any other map, The Internet map is a scheme displaying objects’ 
+relative position; but unlike real maps (e.g. the map of the Earth) or 
+virtual maps (e.g. the map of Mordor), the objects shown on it are not 
+aligned on a surface. Mathematically speaking, The Internet map is a 
+bi-dimensional presentation of links between websites on the Internet. 
+Every site is a circle on the map, and its size is determined by website
+ traffic, the larger the amount of traffic, the bigger the circle. 
+Users’ switching between websites forms links, and the stronger the 
+link, the closer the websites tend to arrange themselves to each other.</p><h2>	Charges and springs</h2><p>To
+ draw an analogy from classical physics, one may say that websites are 
+electrically charged bodies, while links between them are springs. 
+Springs pull similar websites together, and the charge does not let the 
+bodies adjoin and pushes websites apart if there is no link between 
+them. Originally, all such electrified bodies (websites) are randomly 
+scattered on the surface of the map. Springs are stretched, repulsion 
+energy is high – the system is far from being at equilibrium. Then the 
+websites start moving under the influence of the forces exerted and in a
+ while come to a halt – forces of attraction now become equal to forces 
+of repulsion, the system has reached its equilibrium. It is exactly that
+ state that is shown on The Internet map.</p><p>Also, an analogy can be 
+drawn from quantum physics. In this case, a website is a physical body 
+with a finite mass, a single user is the mass quantum – the 
+much-spoken-about, yet-to-be-found Higgs’ boson, whereas the act of 
+user’s switching between sites is the gravitational quantum – the 
+graviton, another hypothetical particle.</p><p>Anyway, the real 
+algorithm of plotting The Internet map is quite far from the analogies 
+given above. For those interested, the closest description of the 
+mathematical model can be found in the research <a href="http://reports-archive.adm.cs.cmu.edu/anon/1998/CMU-CS-98-189.pdf">[1]</a>, and the engineering solution looks very similar to what has been described in <a href="ftp://sleepgate.dyndns.org/library/CUDA/nbody_gems3_ch31.pdf">[2]</a>. Google Maps engine has been used as the platform for displaying.</p><h2>Semantic web</h2><p>The
+ map of the Internet is a photo shot of the global network as of end of 
+2011. It encompasses over 350 thousand websites from 196 countries and 
+all domain zones. Information about more than 2 million links between 
+the websites has joined some of them together into topical clusters. As 
+one might have expected, the largest clusters are formed by national 
+websites, i.e. sites belonging to one country. For the sake of 
+convenience, all websites relative to a certain country carry the same 
+color. For instance, the red zone at the top corresponds to Russian 
+segment of the net, the yellow one on the left stands for the Chinese 
+segment, the purple one on the right is Japanese, the large light-blue 
+central one is the American segment, etc.</p><img class="infoIMG" alt="info" src="The%20Internet%20map_files/info-eng.jpg"><p>Importantly,
+ clusters on the map are semantically charged, i.e. they join websites 
+together according to their content. For example, a vast porno cluster 
+can be seen between Brazil and Japan as well as a host of minor clusters
+ uniting websites of the same field or similar purposes.</p><h2>	The Internet Phenomenon</h2><p>The
+ Internet global network is a phenomenon of technological civilization, 
+and its exceptional complexity surpasses anything mankind has ever 
+created. In essence, what we are dealing with here is a huge quantity of
+ utterly unstructured information. The Internet map is an attempt to 
+look into the hidden structure of the network, fathom its colossal 
+scale, and examine that which is impossible to understand from the bare 
+figures of statistics.</p><h3>Ideas and suggestions</h3><p>We will appreciate any feedback. Please use the address <a href="mailto:internetmap.net@gmail.com">internetmap.net@gmail.com</a> and check out our <a href="http://the-internet-map.blogspot.com/">blog</a> also.</p><p>The Internet map is a non-commercial project. You can share our expenses and let more people see beauty of the Internet.</p><form action="https://www.paypal.com/cgi-bin/webscr" method="post"><input name="cmd" value="_s-xclick" type="hidden"><input name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----" type="hidden"><input src="The%20Internet%20map_files/btn_donate_LG.gif" name="submit" alt="PayPal — The safer, easier way to pay online." border="0" type="image"><img alt="" src="The%20Internet%20map_files/pixel.gif" border="0" height="1" width="1"></form></div>
+        </div>
+        <div style="background-color: black; overflow: hidden;" id="map_canvas" class="mainMap"><div style="position: absolute; left: 0px; top: 0px; overflow: hidden; width: 100%; height: 100%; z-index: 0;"><div style="position: absolute; left: 0px; top: 0px; overflow: hidden; width: 100%; height: 100%; z-index: 0;"><div style="position: absolute; left: 0px; top: 0px; z-index: 1; cursor: url(&quot;http://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;), default;"><div style="z-index: 100; position: absolute; left: 0px; top: 0px;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div style="position: absolute; left: 0px; top: 0px; z-index: 1;"><div style="width: 256px; height: 256px; position: absolute; left: 542px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 542px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 286px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 286px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 798px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 798px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 30px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 30px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1054px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1054px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -226px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -226px; top: -14px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1310px; top: -270px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1310px; top: -14px;"></div></div></div></div><div style="z-index: 101; position: absolute; left: 0px; top: 0px;"></div><div style="z-index: 102; position: absolute; left: 0px; top: 0px;"></div><div style="z-index: 103; position: absolute; left: 0px; top: 0px;"></div><div style="z-index: 104; position: absolute; left: 0px; top: 0px;"></div><div style="z-index: 105; position: absolute; left: 0px; top: 0px;"></div><div style="z-index: 106; position: absolute; left: 0px; top: 0px;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div style="position: absolute; left: 0px; top: 0px; z-index: 1;"><div style="width: 256px; height: 256px; position: absolute; left: 286px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/1%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 286px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/1%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 542px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/2%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 798px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/3%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 542px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/2%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 798px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/3%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 30px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/0%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 30px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/0%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -226px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/-1%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1054px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/4%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -226px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/-1%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1054px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/4%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1310px; top: -14px;"><img draggable="false" src="The%20Internet%20map_files/5%252018.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 1310px; top: -270px;"><img draggable="false" src="The%20Internet%20map_files/5%252017.png" style="width: 256px; height: 256px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div></div></div></div></div><div style="margin: 2px 5px 2px 2px; z-index: 1000000; position: absolute; left: 0px; bottom: 0px;"><a title="点击以在 Google 地图上查看此区域" href="http://maps.google.com/maps?ll=-25.211509,-152.383171&amp;z=5&amp;hl=zh-CN" target="_blank" style="position: static; overflow: visible; float: none; display: inline;"><div style="width: 62px; height: 24px; cursor: pointer;"><img draggable="false" src="The%20Internet%20map_files/google_white.png" style="position: absolute; left: 0px; top: 0px; width: 62px; height: 24px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div></a></div><div style="z-index: 1000001; position: absolute; right: 0px; bottom: 0px;" class="gmnoprint"><div style="height: 19px; -moz-user-select: none; line-height: 19px; padding-right: 2px; padding-left: 50px; background: -moz-linear-gradient(left center , rgba(255, 255, 255, 0) 0px, rgba(255, 255, 255, 0.5) 50px) repeat scroll 0% 0% transparent; font-family: Arial,sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right;"><a style="color: rgb(68, 68, 68); text-decoration: underline; cursor: pointer; display: none;">地图数据</a><span style="display: none;"></span><span style="display: none;"> - </span><a target="_blank" href="http://www.google.com/intl/zh-CN_US/help/terms_maps.html" style="color: rgb(68, 68, 68); text-decoration: underline; cursor: pointer;">使用条款</a></div></div><div style="background-color: white; padding: 15px 21px; border: 1px solid rgb(171, 171, 171); font-family: Arial,sans-serif; color: rgb(34, 34, 34); box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2); z-index: 10000002; display: none; width: 256px; height: 53px; position: absolute; left: 509px; top: 5px;"><div style="padding: 0px 0px 10px; font-size: 16px;">地图数据</div><div style="font-size: 13px;"></div><div style="width: 10px; height: 10px; overflow: hidden; position: absolute; opacity: 0.7; right: 12px; top: 12px; z-index: 10000; cursor: pointer;"><img draggable="false" src="The%20Internet%20map_files/imgs8.png" style="position: absolute; left: -18px; top: -44px; width: 68px; height: 67px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"></div></div><div style="position: absolute; right: 0px; bottom: 0px;" class="gmnoscreen"><div style="font-family: Arial,sans-serif; font-size: 10px; color: rgb(68, 68, 68); direction: ltr; text-align: right; background-color: rgb(245, 245, 245);"></div></div><div class="gmnoprint" style="display: none; font-size: 10px; height: 17px; background-color: rgb(245, 245, 245); border: 1px solid rgb(220, 220, 220); line-height: 19px; position: absolute; right: 0px; bottom: 0px;"><a href="http://maps.google.com/maps?ll=-25.211509,-152.383171&amp;z=5&amp;hl=zh-CN&amp;skstate=action:mps_dialog$apiref:1" style="font-family: Arial,sans-serif; font-size: 85%; font-weight: bold; padding: 1px 3px; color: rgb(68, 68, 68); text-decoration: none; position: relative; bottom: 1px;" title="向 Google 报告道路地图或图像中的错误" target="_new">报告地图错误</a></div><div controlheight="44" controlwidth="22" style="margin: 5px; -moz-user-select: none; position: absolute; left: 0px; top: 0px;" class="gmnoprint"><div controlheight="0" controlwidth="0" style="opacity: 0.6; display: none; position: absolute;" class="gmnoprint"><img title="将地图旋转 90 度" style="-moz-user-select: none; border: 0px none; padding: 0px; margin: 0px; cursor: pointer; width: 22px; height: 22px;" draggable="false" src="The%20Internet%20map_files/rotate2.png"></div><div style="position: absolute; left: 0px; top: 5px;" controlheight="39" controlwidth="22" class="gmnoprint"><img draggable="false" src="The%20Internet%20map_files/szc4.png" style="width: 22px; height: 39px; -moz-user-select: none; border: 0px none; padding: 0px; margin: 0px;"><div title="放大" style="position: absolute; left: 0px; top: 0px; width: 22px; height: 17px; cursor: pointer;"></div><div title="缩小" style="position: absolute; left: 0px; top: 18px; width: 22px; height: 17px; cursor: pointer;"></div></div></div><div style="margin: 5px; z-index: 0; position: absolute; cursor: pointer; right: 0px; top: 0px;" class="gmnoprint"></div></div></div>
+        <div class="footerHelper">
+        </div>
+    </section>
+
+
+</body></html>

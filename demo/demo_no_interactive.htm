@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style type="text/css">@media print {  .gmnoprint {    display:none  }}@media screen {  .gmnoscreen {    display:none  }}</style>
+<!--
+<script src="The%20Internet%20map_files/menu129.js" type="text/javascript"></script><script src="The%20Internet%20map_files/shares.json" type="text/javascript"></script><script src="The%20Internet%20map_files/counter004.js" type="text/javascript"></script><link media="all" href="The%20Internet%20map_files/counter003.css" type="text/css" rel="stylesheet"><script src="The%20Internet%20map_files/zh-cn.js" type="text/javascript"></script>
+-->
+
+<link media="all" href="The%20Internet%20map_files/widget096.css" type="text/css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link href="The%20Internet%20map_files/style.css" rel="Stylesheet">
+    <script type="text/javascript" src="The%20Internet%20map_files/jquery.js"></script>
+    <link href="The%20Internet%20map_files/jquery-ui.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="The%20Internet%20map_files/jquery-ui.js"></script>
+
+<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+
+    <script type="text/javascript">
+        // Эвклидова Проекция
+        var EuclideanProjection = function () {
+            // Ширина, она же высота одного кусочка картинки
+            var EUCLIDEAN_RANGE = 256;
+            // Центр этой самой картинки
+            this.pixelOrigin = new google.maps.Point(EUCLIDEAN_RANGE / 2, EUCLIDEAN_RANGE / 2);
+            // Количество градусов в одном пикселе картинки
+            this.pixelsPerLonDegree = EUCLIDEAN_RANGE / 360;
+            // Количество радиан в одном пикселе картинки
+            this.pixelsPerLonRadian = EUCLIDEAN_RANGE / (2 * Math.PI);
+        };
+
+        // Эти два метода надо реализовать в классе проекции
+        // http://code.google.com/apis/maps/documentation/javascript/maptypes.html#Projections
+        EuclideanProjection.prototype = {
+            pixelOrigin: new google.maps.Point(0, 0),
+            pixelsPerLonDegree: 0,
+            pixelsPerLonRadian: 0,
+
+            // код взят из 
+            // http://library.ucf.edu/Web/JS/Maps.js
+            // в работе можно глянуть тут
+            // http://library.ucf.edu/Administration/Maps/
+            // страна должна знать героев в лицо
+            fromLatLngToPoint: function (latLng, opt_point) {
+                var point = opt_point || new google.maps.Point(0, 0);
+                point.x = this.pixelOrigin.x + latLng.lng() * this.pixelsPerLonDegree;
+                point.y = this.pixelOrigin.y + (-1 * latLng.lat()) * this.pixelsPerLonDegree;
+                //console.log("fromLatLngToPoint", latLng, point);
+                return point;
+            },
+
+            fromPointToLatLng: function (point) {
+                var lng = (point.x - this.pixelOrigin.x) / this.pixelsPerLonDegree,
+                    lat = -1 * (point.y - this.pixelOrigin.y) / this.pixelsPerLonDegree;
+                //console.log("fromPointToLatLng", point, new google.maps.LatLng(lat , lng, true));
+                return new google.maps.LatLng(lat, lng, true);
+            }
+        };
+    </script>
+    <script type="text/javascript">
+        var imageOptions = {
+            getTileUrl: function (coord, zoom) {
+                //return "http://d2h9tsxwphc7ip.cloudfront.net/" + zoom + '/' + coord.x + ' ' + coord.y + ".png";
+                //return "./tiles/chart_" + zoom + '_' + coord.x + '_' + coord.y + '.png'; 
+                return "./tiles/pack_" + zoom + '_' + coord.x + '_' + coord.y + '.png'; 
+            },
+            tileSize: new google.maps.Size(256, 256),
+            isPng: true
+        };
+
+        var imageMap = new google.maps.ImageMapType(imageOptions);
+        imageMap.projection = new EuclideanProjection();
+        imageMap.name = "webmap";
+        imageMap.minZoom = 2;
+        imageMap.maxZoom = 6;
+
+        var mapOptions = {
+            zoom: 1,
+            streetViewControl: false,
+            panControl: false,
+            center: new google.maps.LatLng(25, 0),
+            mapTypeControlOptions: {
+                mapTypeIds: []
+            },
+            backgroundColor: 'white'
+        };
+
+        //в эту функцию передаем координаты тайла и zoom и и она показывает нужный тайл
+        function g(x, y, zoom) {
+            var z = Math.min(zoom + 2, imageMap.maxZoom);
+            var point = new google.maps.Point(x, y);
+            var t = imageMap.projection.fromPointToLatLng(point);
+            map.panTo(t);
+            map.setZoom(z);
+        };
+
+        function initialize() {
+            map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+            map.mapTypes.set('webmap', imageMap);
+            map.setMapTypeId('webmap');
+            google.maps.event.addListener(map, 'click', function (event) {
+                gClick(event);
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        function setBaloon(data,bPosition) {
+            var contentString = '<div>'+
+                '<a href="http://www.'+ data.url +'" target="_blank">'+ data.url + '</a>'+
+                '</div>';
+            bPosition = imageMap.projection.fromPointToLatLng(bPosition);
+            var marker = new google.maps.Marker({
+                position: bPosition,
+                map: map,
+                visible:false
+            });
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString,
+            });
+            infowindow.open(map,marker);
+        }
+        function gClick(event) {
+            
+            var xGmap = event.X.x;
+            var yGmap = event.X.y;
+            $.getJSON("/Hit", { x: xGmap, y: yGmap },
+                function (data) {
+                    if(data)
+                    {
+                        setBaloon(data,event.X);
+                    };
+
+                }); 
+
+             
+        };
+        function puturl(x, y, zoom) {
+            window.location.hash = zoom + "-" + x + "-" + y;
+        };
+
+        function posurl() {
+            var str = location.href;
+            str = str.split('#');
+            if (str[1]) {
+                str = str[1].split('-');
+
+                var x = parseFloat(str[1]);
+                var y = parseFloat(str[2]);
+                var z = parseInt(str[0]);
+
+                if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+                    g(x, y, z);
+                }
+            }
+        };
+
+        function sendForm() {
+            if (document.getElementById("searchString").value != "") {
+                $.getJSON("/Find/" + document.getElementById("searchString").value, {},
+                    function (data) {
+                        if (data.zoom > 0) {
+                            g(data.x, data.y, data.zoom, true);
+                            puturl(data.x, data.y, data.zoom);
+                        }
+                        else {
+                            alert("Site not found");
+                        }
+                    });
+            }
+        }
+    </script>
+
+    <title>The Internet map</title>
+
+<body onload="initialize()">
+    <section>
+        <div style="background-color: #fff; overflow: hidden;" id="map_canvas" class="mainMap">
+        </div>
+    </section>
+</body></html>

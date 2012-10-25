@@ -1,0 +1,293 @@
+
+/* small reset */
+*
+{
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+/* default */
+html, body
+{
+    height: 100%;
+    font: normal 14px/140% Arial;
+    min-width: 850px;
+    background: #000;
+}
+h1
+{
+    font-family: FBeau; 
+}
+h2, h3,h4,h5
+{
+    font-size: 18px;
+}
+a
+{
+    color: #005B7D;
+}
+*:focus, *:active
+{
+    outline: none;
+}
+
+@font-face 
+{
+    font-family: PFBeau;
+    src: url('../fonts/PFBeauSansPro-Thin.eot');
+}
+@font-face 
+{
+    font-family: PFBeau;
+    src: url('../fonts/PFBeauSansPro-Thin.woff') format('woff'),  
+         url('../fonts/PFBeauSansPro-Thin.ttf') format('truetype'),
+         url('../fonts/PFBeauSansPro-Thin.svg#font') format('svg');
+}
+
+section
+{
+    position: relative;
+    min-height: 100%;
+}
+.footerHelper
+{
+    height: 95px;
+}
+.contaner
+{
+    padding-bottom: 30px;
+}
+    .contaner .close 
+    {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        cursor: pointer;
+    }
+
+.ir {
+    display: inline-block;
+    text-indent: -999em;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    text-align: left;
+    direction: ltr;
+}
+
+/* main Page */
+.mainMap
+{
+    width: 100%;
+    height: 100%; 
+    margin:0 auto;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.formDiv, .headDiv
+{
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    z-index: 9999;
+    color: #fff;
+    width: 350px;
+}
+.formDiv a, .headDiv a
+{
+    color: #fff;
+}
+
+.headDiv
+{
+    position: relative;
+    top: 0;
+    left: 0;
+}
+.formDiv h1, .headDiv h1
+{
+    font: normal 39px/130% PFBeau;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+.formDiv .controls a
+{
+    font-size: 14px;
+    color: #43b7f8;
+    margin-right: 10px;
+}
+.formDiv .controls a:hover 
+{
+    text-decoration: none;
+}
+.formDiv input
+{
+    float: left;
+}
+.formDiv .textBox
+{
+    background: #fff;
+    border-radius: 5px 0 0 5px;
+    padding: 8px 10px;
+    width: 230px;
+    box-shadow: inset 1px 3px 3px rgba(0,0,0,.3);
+    
+}
+.formDiv .buttonBlock
+{
+    color: #003761;
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(255,255,255,.3);
+    padding: 8px 20px;
+    border-radius: 0 5px 5px 0;
+    border-left: 1px solid #005b7d;
+    cursor: pointer;
+    background: -o-linear-gradient(90deg, #0779a5, #48bcfe);
+    background: -ms-linear-gradient(90deg, #0779a5, #48bcfe);
+    background: -moz-linear-gradient(90deg, #0779a5, #48bcfe);
+    background: -webkit-linear-gradient(90deg, #0779a5, #48bcfe);
+    background: linear-gradient(90deg, #0779a5, #48bcfe);
+} 
+.formDiv .buttonBlock:hover
+{
+    box-shadow: inset 0 5px 5px rgba(255,255,255,.1); 
+}
+.formDiv .buttonBlock:active
+{
+    background: -o-linear-gradient(90deg, #0F84B1, #7ECBF7);
+    background: -ms-linear-gradient(90deg, #0F84B1, #7ECBF7);
+    background: -moz-linear-gradient(90deg, #0F84B1, #7ECBF7);
+    background: -webkit-linear-gradient(90deg, #0F84B1, #7ECBF7);
+    background: linear-gradient(90deg, #0F84B1, #7ECBF7);
+}
+.langAndLogo
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    width: 150px;
+    padding: 30px 20px;
+}
+.langAndLogo img
+{
+    vertical-align: top;
+}
+.langs
+{
+    display: inline-block;
+    margin-right: 40px;
+}
+.langs a
+{
+    color: #49aadf;
+    text-decoration: underline;
+}
+.langs a.selected
+{
+    color: #fff;
+    text-decoration: none;
+}
+.logoRow
+{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    padding-right: 180px;
+    padding-bottom: 15px;
+}
+.logoRow a
+{
+    margin: 0 10px;
+    text-decoration: none;
+}
+.logoRow .positive
+{
+    position: absolute;
+    bottom: 40px;
+    right:10px;
+    color: #0077bd;
+    margin: 0;
+}
+
+.controls 
+{
+    position: absolute;
+    right: -140px;
+    top: -5px;
+}
+
+.langSelector 
+{
+    background: url('../Content/flags/flags.png') no-repeat 0 0;
+    cursor: pointer;
+    height: 13px;
+    position: relative;
+    top: 2px;
+    width: 22px;
+}
+
+.langSelector.ru 
+{
+    background-position: 0 -13px;
+}
+
+.langSelector.en 
+{
+    background-position: 0 0;
+}
+
+.shareBox 
+{
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    z-index:9999;
+    width:250px;
+}
+
+
+/* google hack */
+
+.gmnoprint .gmnoprint
+{
+    top: 155px !important;
+    left: 20px !important;
+}
+
+
+/* About */
+.ownC
+{
+    left:-1000px;
+    width: 800px;
+    top: 95px;
+    position: fixed;
+    z-index: 9999;
+    -webkit-transition: left .3s ease-in;
+}
+.ownC.active
+{
+    left: 20px;
+    position: relative;
+}
+.textBlock
+{
+    padding: 60px 50px;
+    background: #fff;
+}
+.textBlock h2, .textBlock h3, .textBlock h4, .textBlock h5
+{
+    margin-bottom: 8px;
+}
+.textBlock p
+{
+    margin-bottom: 20px;
+}
+.infoIMG
+{
+    margin-top: 10px;
+    margin-left: -34px;
+    margin-bottom: 30px;
+}

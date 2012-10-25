@@ -1,0 +1,5 @@
+.DS_Store
+*.swp
+demo/tiles/
+demo/chart/
+html to svg/svg_download/
