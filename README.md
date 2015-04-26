@@ -5,6 +5,10 @@ use google map to present big image, expecially svg.
 
 bacause the images are so big, so I can only upload some scripts. You can download all files [here](https://docs.google.com/open?id=0B6Wtwb29rmDmMWF6NGFqM2x3T1k).
 
+![image1](https://raw.githubusercontent.com/jdk137/large-svg-GoogleMap-Zoom/master/image1.png)
+
+![image2](https://raw.githubusercontent.com/jdk137/large-svg-GoogleMap-Zoom/master/image2.png)
+
 4 steps:
 -----
 
